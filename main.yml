@@ -1,0 +1,39 @@
+---
+
+- name: Magic Mirror Setup
+  hosts: localhost
+  connection: local
+  vars_files:
+  #- secrets.yml ## uncomment this if you have secrets to use in modules
+  - modules.yml
+  
+  vars:
+    mm_root: '/home/pi/MagicMirror' # root install directory
+    mm_default_version: master
+
+  tasks:
+  - name: Create Install Directory
+    file:
+      path: "{{ mm_root }}"
+      state: directory
+
+  - name: Clone Magic Mirror
+    git:
+      repo: https://github.com/MichMich/MagicMirror 
+      dest: "{{ mm_root }}"
+      version: "{{ mm_default_version }}"
+      force: yes
+
+  - name: NPM Install
+    npm:
+      path: "{{ mm_root }}"
+
+  - name: Magic Mirror Config.js
+    template:
+      src: './templates/config.js.j2'
+      dest: "{{ mm_root }}/config/config.js"
+
+  - name: Install Modules
+    include_tasks: install_module.yml
+    when: item.github is defined
+    with_items: "{{ modules }}"
