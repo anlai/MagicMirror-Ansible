@@ -8,8 +8,10 @@
   - modules.yml
   
   vars:
-    mm_root: '/home/pi/MagicMirror' # root install directory
+    mm_username: pi
+    mm_root: "/home/{{ mm_username }}/MagicMirror" # root install directory
     mm_default_version: master
+    mm_enable_startup: true
 
   tasks:
   - name: Create Install Directory
@@ -37,3 +39,28 @@
     include_tasks: install_module.yml
     when: item.github is defined
     with_items: "{{ modules }}"
+  
+  - name: Install PM2
+    npm:
+      name: pm2
+      global: true
+
+  - name: Setup Magic Mirror Startup on Reboot
+    become: true
+    command: "pm2 startup systemd -u {{ mm_username }} --hp /home/{{ mm_username }}"
+    environment:
+      PATH: "{{ ansible_env.PATH }}"
+    when: mm_enable_startup
+
+  - name: Startup Script
+    template:
+      src: './templates/mm_startup.sh'
+      dest: "/home/{{ mm_username }}/mm.sh"
+      mode: 0755
+    when: mm_enable_startup
+  
+  - name: Start and Save
+    command: |
+      pm2 start /home/{{ mm_username }}/mm.sh
+      pm2 save
+    when: mm_enable_startup
