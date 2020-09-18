@@ -27,6 +27,8 @@ git clone git@github.com:anlai/MagicMirror-Ansible.git mm-ansible
 
 ### Prerequisites
 
+If you already have a server setup to run Ansible, you can run this playbook from that server (just install Node on this server).  This script sets it up so you can just run Ansible locally.
+
 First step is to install the prerequisites for this installation to work, includes Ansible, Python, Pip, and Node.  A script is provided for you, just need to make it executable and install.  (Yes technically Node should be installed by the playbook, but I didn't want to wait for the install to run every time I ran the playbook)
 
 ```
